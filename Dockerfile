@@ -44,10 +44,6 @@ ADD debian/resources/fusionpbx /usr/src/debian/resources/fusionpbx
 ADD debian/resources/finish.sh /usr/src/debian/resources/finish.sh
 RUN /bin/bash resources/finish.sh
 
-# ADD debian /usr/src/debian
-# WORKDIR /usr/src/debian
-# RUN /bin/bash install.sh
-
 FROM build-stage AS debug-stage
 # Setup suppervisor
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq supervisor
@@ -75,13 +71,24 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq memcached
 # Clean apt
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+RUN DEBIAN_FRONTEND=noninteractive apt-get update -yq
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq postgresql-client-16
+
 # Tao folder de khoi tao php
 RUN mkdir -p /run/php/
 RUN rm -rf /usr/src/debian /usr/src/freeswitch-1.10.12 /usr/src/libks /usr/src/sofia-sip-1.13.17 /usr/src/spandsp /usr/src/v1.13.17.zip
-WORKDIR /usr/share/freeswitch/scripts
+WORKDIR /var/cache/fusionpbx
+ADD init-database.sh /var/init-database.sh
+ADD reset-password.sh /var/reset-password.sh
 ADD startup.sh /var/startup.sh
 RUN chmod 777 /var/startup.sh
 CMD [ "/var/startup.sh" ]
 
 # docker build -t fusionpbx-base-image .
 # docker build -t pbx-core .
+# /usr/bin/tar -czvf data-pbx-db.tar.gz data-pbx-db
+# docker run -it --rm --network host --name freeswitch pbx-core
+# namichain.azurecr.io/voip/pbx-core
+# namichain.azurecr.io/voip/pbx-core-base

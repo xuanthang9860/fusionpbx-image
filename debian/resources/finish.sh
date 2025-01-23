@@ -37,6 +37,8 @@ sed -i /etc/fusionpbx/config.conf -e s:"{database_host}:$database_host:"
 sed -i /etc/fusionpbx/config.conf -e s:"{database_name}:$database_name:"
 sed -i /etc/fusionpbx/config.conf -e s:"{database_username}:$database_username:"
 sed -i /etc/fusionpbx/config.conf -e s:"{database_password}:$database_password:"
+sed -i /etc/fusionpbx/config.conf -e s:"{swtich_event_socket_port}:$swtich_event_socket_port:"
+sed -i /etc/fusionpbx/config.conf -e s:"{swtich_event_socket_password}:$swtich_event_socket_password:"
 
 #add the database schema
 # cd /var/www/fusionpbx && php /var/www/fusionpbx/core/upgrade/upgrade_schema.php > /dev/null 2>&1
