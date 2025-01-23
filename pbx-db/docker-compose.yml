@@ -1,0 +1,13 @@
+services:
+  pbx-db:
+    container_name: db
+    image: postgres:16-bullseye
+    environment:
+      POSTGRES_DB: fusionpbx
+      POSTGRES_USER: fusionpbx
+      POSTGRES_PASSWORD: fusionpbx
+    volumes:
+       - ./postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
