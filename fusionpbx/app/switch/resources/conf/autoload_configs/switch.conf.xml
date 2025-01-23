@@ -33,15 +33,15 @@
 		allowing cluster environments such as RHCS to have identical FreeSWITCH configurations but run
 		as different hostnames.
 		-->
-		<!-- <param name="switchname" value="freeswitch"/> -->
+		<param name="switchname" value="pbx-core"/>
 
 		<!-- Maximum number of simultaneous DB handles open -->
-		<param name="max-db-handles" value="50"/>
+		<param name="max-db-handles" value="1000"/>
 		<!-- Maximum number of seconds to wait for a new DB handle before failing -->
-		<param name="db-handle-timeout" value="10"/>
+		<param name="db-handle-timeout" value="30"/>
 
 		<!-- Minimum idle CPU before refusing calls -->
-		<!-- <param name="min-idle-cpu" value="25"/> -->
+		<param name="min-idle-cpu" value="15"/>
 
 		<!--
 		Max number of sessions to allow at any given time.
@@ -50,9 +50,9 @@
 		this will ensure you're able to use the entire DS3 without a problem.  Otherwise you'll
 		be 144 channels short of always filling that DS3 up which can translate into waste.
 		-->
-		<param name="max-sessions" value="1000"/>
+		<param name="max-sessions" value="1002"/>
 		<!--Most channels to create per second -->
-		<param name="sessions-per-second" value="30"/>
+		<param name="sessions-per-second" value="102"/>
 		<!-- Default Global Log Level - value is one of debug,info,notice,warning,err,crit,alert -->
 		<param name="loglevel" value="debug"/>
 
@@ -60,9 +60,9 @@
 		<!-- <param name="debug-level" value="10"/> -->
 
 		<!-- SQL Buffer length within rage of 32k to 10m -->
-		<!-- <param name="sql-buffer-len" value="1m"/> -->
+		<param name="sql-buffer-len" value="1m"/>
 		<!-- Maximum SQL Buffer length must be greater than sql-buffer-len -->
-		<!-- <param name="max-sql-buffer-len" value="2m"/> -->
+		<param name="max-sql-buffer-len" value="10m"/>
 
 		<!--
 		 The min-dtmf-duration specifies the minimum DTMF duration to use on
@@ -138,8 +138,8 @@
 		<!-- NEEDS DOCUMENTATION -->
 
 		<!-- RTP port range -->
-		<!-- <param name="rtp-start-port" value="16384"/> -->
-		<!-- <param name="rtp-end-port" value="32768"/> -->
+		<param name="rtp-start-port" value="10000"/>
+		<param name="rtp-end-port" value="15000"/>
 
 		<!-- <param name="rtp-enable-zrtp" value="true"/> -->
 
@@ -148,7 +148,7 @@
 		 Allow to specify the sqlite db at a different location (In this example, move it to ramdrive for
 		 better performance on most linux distro (note, you loose the data if you reboot))
 		-->
-		<!-- <param name="core-db-name" value="/dev/shm/core.db" /> -->
+		<param name="core-db-name" value="/dev/shm/core.db" />
 
 		<!-- The system will create all the db schemas automatically, set this to false to avoid this behaviour -->
 		<param name="auto-create-schemas" value="true"/>
@@ -164,7 +164,7 @@
 		<param name="events-use-dispatch" value="false"/>
 
 		<!-- SWITCH default is 1. Use this number of thread on startup. -->
-		<param name="initial-event-threads" value="8"/>
+		<param name="initial-event-threads" value="105"/>
 	</settings>
 
 </configuration>

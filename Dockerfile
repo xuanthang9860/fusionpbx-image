@@ -44,10 +44,6 @@ ADD debian/resources/fusionpbx /usr/src/debian/resources/fusionpbx
 ADD debian/resources/finish.sh /usr/src/debian/resources/finish.sh
 RUN /bin/bash resources/finish.sh
 
-# ADD debian /usr/src/debian
-# WORKDIR /usr/src/debian
-# RUN /bin/bash install.sh
-
 FROM build-stage AS debug-stage
 # Setup suppervisor
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq supervisor
@@ -55,6 +51,7 @@ ADD config/supervisor/conf.d/freeswitch-supervisord.conf /etc/supervisor/conf.d/
 ADD config/supervisor/conf.d/memcahed-supervisord.conf /etc/supervisor/conf.d/memcahed-supervisord.conf
 ADD config/supervisor/conf.d/php-fpm-supervisord.conf /etc/supervisor/conf.d/php-fpm-supervisord.conf
 ADD config/supervisor/conf.d/nginx-supervisord.conf /etc/supervisor/conf.d/nginx-supervisord.conf
+ADD config/supervisor/conf.d/cron-supervisord.conf /etc/supervisor/conf.d/cron-supervisord.conf
 ADD config/supervisor/supervisord.conf /etc/supervisor/supervisord.conf 
 
 # Install mod audio_stream
@@ -71,17 +68,43 @@ RUN cmake -DCMAKE_BUILD_TYPE=Release ..
 RUN make
 RUN make install
 
+WORKDIR /usr/src/freeswitch-1.10.12/src/mod/applications/mod_oreka/
+RUN make
+RUN make install
+
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq memcached
+
+# Setting crontab
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq cron
+RUN echo "* * * * * root /usr/bin/php /var/www/fusionpbx/app/xml_cdr/xml_cdr_import.php 300" > /etc/cron.d/pbx_cron_tab
+RUN chmod 0644 /etc/cron.d/pbx_cron_tab
+RUN /usr/bin/crontab /etc/cron.d/pbx_cron_tab
+
 # Clean apt
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+RUN DEBIAN_FRONTEND=noninteractive apt-get update -yq
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq postgresql-client-16
+
 # Tao folder de khoi tao php
 RUN mkdir -p /run/php/
-RUN rm -rf /usr/src/debian /usr/src/freeswitch-1.10.12 /usr/src/libks /usr/src/sofia-sip-1.13.17 /usr/src/spandsp /usr/src/v1.13.17.zip
-WORKDIR /usr/share/freeswitch/scripts
+# RUN rm -rf /usr/src/debian /usr/src/freeswitch-1.10.12
+RUN rm -rf /usr/src/libks /usr/src/sofia-sip-1.13.17 /usr/src/spandsp /usr/src/v1.13.17.zip
+WORKDIR /var/cache/fusionpbx
+ADD init-database.sh /var/init-database.sh
+ADD reset-password.sh /var/reset-password.sh
 ADD startup.sh /var/startup.sh
 RUN chmod 777 /var/startup.sh
 CMD [ "/var/startup.sh" ]
 
-# docker build -t fusionpbx-base-image .
+# docker build -t pbx-core-base-image .
 # docker build -t pbx-core .
+# /usr/bin/tar -czvf data-pbx-db.tar.gz data-pbx-db
+# docker run -it --rm --network host --name freeswitch pbx-core
+# namichain.azurecr.io/pbx/pbx-core
+# namichain.azurecr.io/pbx/pbx-core-base-image
+
+# docker tag pbx-core-base-image namichain.azurecr.io/pbx/pbx-core-base-image
+# docker tag pbx-core namichain.azurecr.io/pbx/pbx-core
